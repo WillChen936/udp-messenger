@@ -6,13 +6,17 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#define serverPort 50500
-
 
 int main()
 {
-    // message buffer
+    // Init the configurations.
     char buf[1024] = {0};
+    char ip[10] = {0};
+    int port = 0;
+    printf("Please enter the IP address you want to listen to : ");
+    scanf("%s", ip);
+    printf("Please enter the Port you want to listen to : ");
+    scanf("%d", &port);
 
     // build socket fd, PF_INET = IPv4, SOCK_DGRAM = UDP
     int socket_fd = socket(PF_INET , SOCK_DGRAM , 0);
@@ -24,8 +28,8 @@ int main()
     // set server address
     struct sockaddr_in serverAddr = {
         .sin_family = AF_INET,
-        .sin_addr.s_addr = INADDR_ANY,
-        .sin_port = htons(serverPort)
+        .sin_addr.s_addr = inet_addr(ip),
+        .sin_port = htons(port)
     };
     
     // bind the socket to specific port
