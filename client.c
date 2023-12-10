@@ -1,13 +1,12 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <math.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#define serverPort 50500
-#define serverIP "127.0.0.1"
 
 int main() 
 {
@@ -37,31 +36,53 @@ int main()
     int len = sizeof(serverAddr);
 
     // Wait for user input and send the data to server.
-    while (1) {
-        // data input from user
-        printf("Please input your message: ");
-        scanf("%s", buf);
+    // data input from user
+    printf("Please input your message: ");
+    scanf("%s", buf);
 
-        // transport the data to server
-        sendto(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
+    // transport the data to server
+    sendto(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
 
-        // clear the message buffer.
-        memset(buf, 0, sizeof(buf));
+    // clear the message buffer.
+    memset(buf, 0, sizeof(buf));
 
+
+    struct timeval tv;
+    int multipiler = 2;
+    int base = 500;
+    int failures = 0;
+    int wait_interval = 0;
+    int max_wait_interval = 8000;
+
+    while(failures <= 9 && wait_interval < max_wait_interval) {
+        wait_interval = base * pow(multipiler, failures);
+        tv.tv_sec = wait_interval / 1000;
+        tv.tv_usec = (wait_interval % 1000) * 1000;
+        printf("wait_interval = %d, tv_sec = %ld, tv_usec = %ld\n", wait_interval, tv.tv_sec, tv.tv_usec);
+        setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
         // wait server's return data.
         if (recvfrom(socket_fd, recvbuf, sizeof(recvbuf), 0, (struct sockaddr *)&serverAddr, &len) < 0) {
-            printf("recvfrom data from %s:%d, failed!\n", inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
-            break;
+            failures++;
+            printf("recvfrom data from %s:%d, failed!, failures = %d\n", inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port), failures);
         }
-        
-        // Print the server's address and the return data.
-        printf("get receive message from [%s:%d]: %s\n", inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port), recvbuf);
-        memset(recvbuf, 0, sizeof(recvbuf));
+        else {
+            // Print the server's address and the return data.
+            printf("get receive message from [%s:%d]: %s\n", inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port), recvbuf);
+            memset(recvbuf, 0, sizeof(recvbuf));
+            // close the socket
+            if (close(socket_fd) < 0) {
+                perror("close socket failed!");
+            }
+            exit(0);
+        }
     }
+    
+
+    printf("Communicating with server failed, Close.");
     // close the socket
     if (close(socket_fd) < 0) {
         perror("close socket failed!");
     }
 
-    return 0;
+    exit(1);
 }

@@ -5,7 +5,7 @@ EXE = $(patsubst %.c, %, $(SRC))
 all: ${EXE}
 
 %: %.c
-	$(CC) -o $@.out $@.c
+	$(CC) -o $@.out $@.c -lm
 
 clean:
 	rm *.out
