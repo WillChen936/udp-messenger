@@ -7,6 +7,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#define BASE 500 // ms
+#define MULTIPILER 2
+#define MAX_WAIT_INTERVAL 8000 // ms
+#define MAX_RETRY 10
 
 int main() 
 {
@@ -48,20 +52,17 @@ int main()
 
 
     struct timeval tv;
-    int multipiler = 1;
-    int base = 500;
     int failures = 0;
-    int wait_interval = base;
-    int max_wait_interval = 8000;
+    int wait_interval = BASE;
 
-    while(failures <= 9 && wait_interval <= max_wait_interval) {
+    // Send & RECV with retry function
+    while(failures <= MAX_RETRY && wait_interval <= MAX_WAIT_INTERVAL) {
         tv.tv_sec = wait_interval / 1000;
         tv.tv_usec = (wait_interval % 1000) * 1000;
         setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
         // wait server's return data.
         if (recvfrom(socket_fd, recvbuf, sizeof(recvbuf), 0, (struct sockaddr *)&serverAddr, &len) < 0) {
             failures++;
-            printf("wait_interval = %d, tv_sec = %ld, tv_usec = %ld\n", wait_interval, tv.tv_sec, tv.tv_usec);
             printf("recvfrom data from %s:%d, failed!, failures = %d\n", inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port), failures);
         }
         else {
@@ -74,7 +75,7 @@ int main()
             }
             exit(0);
         }
-        wait_interval = base * pow(multipiler, failures);
+        wait_interval = BASE * pow(MULTIPILER, failures);
     }
     
 
