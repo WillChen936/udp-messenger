@@ -26,6 +26,8 @@ int main()
     scanf("%d", &port);
     printf("How many times do you want to retry(if the wait interval < 8 secs) : ");
     scanf("%d", &max_retry);
+    // Skip the "\n" symbol in the stdin.
+    getchar();
     
     // build socket fd, PF_INET = IPv4, SOCK_DGRAM = UDP
     int socket_fd = socket(PF_INET, SOCK_DGRAM, 0);
@@ -45,8 +47,6 @@ int main()
     // Wait for user input and send the data to server.
     // data input from user
     printf("Please input your message: ");
-    // Skip the "\n" symbol in the stdin.
-    getchar();
     fgets(sendbuf, BUFFER_SIZE, stdin);
 
     // transport the data to server
@@ -84,7 +84,7 @@ int main()
     }
     
 
-    printf("Communicating with server failed, Close.");
+    printf("Communicating with server failed, Close.\n");
     // close the socket
     if (close(socket_fd) < 0) {
         perror("close socket failed!");
