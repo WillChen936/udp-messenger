@@ -1,5 +1,8 @@
 # UDP Messenger
 
+## Introduction
+This is a simple UDP echo program. There are 2 roles, server and client. Server will listen to specific IP:Port. Once it receive the messages, it will return the same message to the source. Client can send the messages to server via IP:Port and can assign the max retry times. The max retry function is followed the `exponential backoff algorithm`.
+
 ## Build in Debian 10
 ```bash
 $ apt update 
