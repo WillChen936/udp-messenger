@@ -10,12 +10,13 @@
 #define BASE 500 // ms
 #define MULTIPILER 2
 #define MAX_WAIT_INTERVAL 8000 // ms
+#define BUFFER_SIZE 1024
 
 int main() 
 {
     // Init the configurations.
-    char buf[1024] = {0};
-    char recvbuf[1024] = {0};
+    char sendbuf[BUFFER_SIZE] = {0};
+    char recvbuf[BUFFER_SIZE] = {0};
     char ip[10] = {0};
     int port = 0;
     int max_retry = 10;
@@ -44,13 +45,15 @@ int main()
     // Wait for user input and send the data to server.
     // data input from user
     printf("Please input your message: ");
-    scanf("%s", buf);
+    // Skip the "\n" symbol in the stdin.
+    getchar();
+    fgets(sendbuf, BUFFER_SIZE, stdin);
 
     // transport the data to server
-    sendto(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
+    sendto(socket_fd, sendbuf, sizeof(sendbuf), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
 
     // clear the message buffer.
-    memset(buf, 0, sizeof(buf));
+    memset(sendbuf, 0, sizeof(sendbuf));
 
 
     struct timeval tv;
