@@ -10,7 +10,6 @@
 #define BASE 500 // ms
 #define MULTIPILER 2
 #define MAX_WAIT_INTERVAL 8000 // ms
-#define MAX_RETRY 10
 
 int main() 
 {
@@ -19,10 +18,13 @@ int main()
     char recvbuf[1024] = {0};
     char ip[10] = {0};
     int port = 0;
+    int max_retry = 10;
     printf("Please enter the IP address you want to listen to : ");
     scanf("%s", ip);
     printf("Please enter the Port you want to listen to : ");
     scanf("%d", &port);
+    printf("How many times do you want to retry(if the wait interval < 8 secs) : ");
+    scanf("%d", &max_retry);
     
     // build socket fd, PF_INET = IPv4, SOCK_DGRAM = UDP
     int socket_fd = socket(PF_INET, SOCK_DGRAM, 0);
@@ -56,7 +58,7 @@ int main()
     int wait_interval = BASE;
 
     // Send & RECV with retry function
-    while(failures <= MAX_RETRY && wait_interval <= MAX_WAIT_INTERVAL) {
+    while(failures < max_retry && wait_interval <= MAX_WAIT_INTERVAL) {
         tv.tv_sec = wait_interval / 1000;
         tv.tv_usec = (wait_interval % 1000) * 1000;
         setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
