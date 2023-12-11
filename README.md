@@ -8,7 +8,7 @@ $ cd /udp-messenger
 $ make
 ```
 
-There are 2 executables `server.out` and `client.out` after `make`. You need to run the `server.out` first for listening the port, then run `client.out` to send the messages. Here is the results below.
+There will generate 2 executables `server.out` and `client.out` after `make`. You need to run the `server.out` first for listening the port, then run `client.out` to send the messages. Here is the results below.
 
 
 * Server  
